@@ -164,7 +164,7 @@ dataset_info = dict(
         0.089, 0.083, 0.083
     ])
 
-data_root = 'data/smoke_keypoint_mpii'
+data_root = 'data/smoke_keypoint_mpii_relabel'
 data = dict(
     samples_per_gpu=64,
     workers_per_gpu=2,
@@ -173,21 +173,21 @@ data = dict(
     train=dict(
         type='TopDownMpiiDataset',
         dataset_info=dataset_info,
-        ann_file=f'{data_root}/annotations/new_center_train.json',
+        ann_file=f'{data_root}/annotations/train.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=train_pipeline),
     val=dict(
         type='TopDownMpiiDataset',
         dataset_info=dataset_info,
-        ann_file=f'{data_root}/annotations/new_center_val.json',
+        ann_file=f'{data_root}/annotations/val.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
         type='TopDownMpiiDataset',
         dataset_info=dataset_info,
-        ann_file=f'{data_root}/annotations/new_center_val.json',
+        ann_file=f'{data_root}/annotations/val.json',
         img_prefix=f'{data_root}/images/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
