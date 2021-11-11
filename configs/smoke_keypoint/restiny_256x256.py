@@ -79,8 +79,8 @@ train_pipeline = [
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]),
+        mean=[0.5],
+        std=[0.25]),
     dict(type='TopDownGenerateTarget', sigma=2),
     dict(
         type='Collect',
@@ -97,8 +97,8 @@ val_pipeline = [
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]),
+        mean=[0.5],
+        std=[0.25]),
     dict(
         type='Collect',
         keys=['img'],
