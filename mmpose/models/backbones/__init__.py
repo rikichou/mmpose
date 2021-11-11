@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .alexnet import AlexNet
 from .cpm import CPM
-from .hourglass import HourglassNet
+from .hourglass import HourglassNet, HourglassDconvNet
 from .hourglass_ae import HourglassAENet
 from .hrnet import HRNet
 from .litehrnet import LiteHRNet
@@ -24,7 +24,7 @@ from .vgg import VGG
 from .vipnas_resnet import ViPNAS_ResNet
 
 __all__ = [
-    'AlexNet', 'HourglassNet', 'HourglassAENet', 'HRNet', 'MobileNetV2',
+    'AlexNet', 'HourglassNet', 'HourglassDconvNet', 'HourglassAENet', 'HRNet', 'MobileNetV2',
     'MobileNetV3', 'RegNet', 'ResNet', 'ResNet_Tiny', 'ResNetSimple', 'ResNetV1d', 'ResNeXt', 'SCNet',
     'SEResNet', 'SEResNeXt', 'ShuffleNetV1', 'ShuffleNetV2', 'CPM', 'RSN',
     'MSPN', 'ResNeSt', 'VGG', 'TCN', 'ViPNAS_ResNet', 'LiteHRNet'
