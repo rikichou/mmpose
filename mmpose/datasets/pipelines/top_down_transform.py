@@ -7,6 +7,52 @@ from mmpose.core.post_processing import (affine_transform, fliplr_joints,
                                          warp_affine_joints)
 from mmpose.datasets.builder import PIPELINES
 
+@PIPELINES.register_module()
+class TopDownRandomFlipWithGrayscale:
+    """Data augmentation with random image flip.
+
+    Required keys: 'img', 'joints_3d', 'joints_3d_visible', 'center' and
+    'ann_info'.
+    Modifies key: 'img', 'joints_3d', 'joints_3d_visible', 'center' and
+    'flipped'.
+
+    Args:
+        flip (bool): Option to perform random flip.
+        flip_prob (float): Probability of flip.
+    """
+
+    def __init__(self, flip_prob=0.5):
+        self.flip_prob = flip_prob
+
+    def __call__(self, results):
+        """Perform data augmentation with random image flip."""
+        img = results['img']
+        joints_3d = results['joints_3d']
+        joints_3d_visible = results['joints_3d_visible']
+        center = results['center']
+
+        # A flag indicating whether the image is flipped,
+        # which can be used by child class.
+        flipped = False
+        if np.random.rand() <= self.flip_prob:
+            flipped = True
+            image_shape = img.shape
+            if len(image_shape) == 3:
+                img = img[:, ::-1, :]
+            else:
+                img = img[:, ::-1]
+            joints_3d, joints_3d_visible = fliplr_joints(
+                joints_3d, joints_3d_visible, img.shape[1],
+                results['ann_info']['flip_pairs'])
+            center[0] = img.shape[1] - center[0] - 1
+
+        results['img'] = img
+        results['joints_3d'] = joints_3d
+        results['joints_3d_visible'] = joints_3d_visible
+        results['center'] = center
+        results['flipped'] = flipped
+
+        return results
 
 @PIPELINES.register_module()
 class TopDownRandomFlip:

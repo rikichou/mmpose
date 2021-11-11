@@ -72,7 +72,7 @@ data_cfg = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile', color_type=color_type),
-    dict(type='TopDownRandomFlip', flip_prob=0.5),
+    dict(type='TopDownRandomFlipWithGrayscale', flip_prob=0.5),
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
     dict(type='TopDownAffine'),
