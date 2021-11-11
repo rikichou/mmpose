@@ -38,6 +38,9 @@ max_channels = 128
 stem_channels = 32
 base_channels = stem_channels
 
+num_deconv_filters = (max_channels/4,)
+num_deconv_kernels = (4,)
+
 model = dict(
     type='TopDown',
     backbone=dict(type='ResNet_Tiny', depth=14, max_channels=max_channels, stem_channels=stem_channels, base_channels=base_channels, in_channels=in_channels),
@@ -46,6 +49,8 @@ model = dict(
         in_channels=128,
         out_channels=channel_cfg['num_output_channels'],
         num_deconv_layers=1,
+        num_deconv_filters=num_deconv_filters,
+        num_deconv_kernels=num_deconv_kernels,
         loss_keypoint=dict(type='JointsMSELoss', use_target_weight=True)),
     train_cfg=dict(),
     test_cfg=dict(
