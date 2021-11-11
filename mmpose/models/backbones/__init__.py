@@ -11,6 +11,7 @@ from .mspn import MSPN
 from .regnet import RegNet
 from .resnest import ResNeSt
 from .resnet import ResNet, ResNetV1d, ResNetSimple
+from .resnet_tiny import ResNet_Tiny
 from .resnext import ResNeXt
 from .rsn import RSN
 from .scnet import SCNet
@@ -24,7 +25,7 @@ from .vipnas_resnet import ViPNAS_ResNet
 
 __all__ = [
     'AlexNet', 'HourglassNet', 'HourglassAENet', 'HRNet', 'MobileNetV2',
-    'MobileNetV3', 'RegNet', 'ResNet', 'ResNetSimple', 'ResNetV1d', 'ResNeXt', 'SCNet',
+    'MobileNetV3', 'RegNet', 'ResNet', 'ResNet_Tiny', 'ResNetSimple', 'ResNetV1d', 'ResNeXt', 'SCNet',
     'SEResNet', 'SEResNeXt', 'ShuffleNetV1', 'ShuffleNetV2', 'CPM', 'RSN',
     'MSPN', 'ResNeSt', 'VGG', 'TCN', 'ViPNAS_ResNet', 'LiteHRNet'
 ]
