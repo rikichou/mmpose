@@ -1,4 +1,3 @@
-_base_ = ['../../../../_base_/datasets/mpii.py']
 log_level = 'INFO'
 load_from = None
 resume_from = None
