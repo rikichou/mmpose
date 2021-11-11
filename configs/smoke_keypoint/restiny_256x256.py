@@ -38,7 +38,7 @@ max_channels = 128
 stem_channels = 32
 base_channels = stem_channels
 
-num_deconv_filters = (max_channels/4,)
+num_deconv_filters = (32,)
 num_deconv_kernels = (4,)
 
 model = dict(
