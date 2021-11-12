@@ -35,7 +35,7 @@ color_type = 'grayscale'
 feat_channel = 64
 in_channels = 1
 stem_channels = 32
-base_channels = 32
+base_channels = 64
 input_size = 128
 
 # model settings
