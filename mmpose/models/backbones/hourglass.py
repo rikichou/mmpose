@@ -11,105 +11,6 @@ from .base_backbone import BaseBackbone
 from .resnet import BasicBlock, ResLayer
 from .utils import load_checkpoint
 
-class HourglassModuleDconv(nn.Module):
-    """Hourglass Module for HourglassNet backbone.
-
-    Generate module recursively and use BasicBlock as the base unit.
-
-    Args:
-        depth (int): Depth of current HourglassModule.
-        stage_channels (list[int]): Feature channels of sub-modules in current
-            and follow-up HourglassModule.
-        stage_blocks (list[int]): Number of sub-modules stacked in current and
-            follow-up HourglassModule.
-        norm_cfg (dict): Dictionary to construct and config norm layer.
-    """
-
-    def __init__(self,
-                 depth,
-                 stage_channels,
-                 stage_blocks,
-                 norm_cfg=dict(type='BN', requires_grad=True)):
-        # Protect mutable default arguments
-        norm_cfg = copy.deepcopy(norm_cfg)
-        super().__init__()
-
-        self.depth = depth
-
-        cur_block = stage_blocks[0]
-        next_block = stage_blocks[1]
-
-        cur_channel = stage_channels[0]
-        next_channel = stage_channels[1]
-
-        self.up1 = ResLayer(
-            BasicBlock, cur_block, cur_channel, cur_channel, norm_cfg=norm_cfg)
-
-        self.low1 = ResLayer(
-            BasicBlock,
-            cur_block,
-            cur_channel,
-            next_channel,
-            stride=2,
-            norm_cfg=norm_cfg)
-
-        if self.depth > 1:
-            self.low2 = HourglassModuleDconv(depth - 1, stage_channels[1:],
-                                        stage_blocks[1:])
-        else:
-            self.low2 = ResLayer(
-                BasicBlock,
-                next_block,
-                next_channel,
-                next_channel,
-                norm_cfg=norm_cfg)
-
-        self.low3 = ResLayer(
-            BasicBlock,
-            cur_block,
-            next_channel,
-            cur_channel,
-            norm_cfg=norm_cfg,
-            downsample_first=False)
-
-        kernel, padding, output_padding = self._get_deconv_cfg(4)
-        self.up2 = build_upsample_layer(
-            dict(type='deconv'),
-            in_channels=cur_channel,
-            out_channels=cur_channel,
-            kernel_size=kernel,
-            stride=2,
-            padding=padding,
-            output_padding=output_padding,
-            bias=False)
-
-        #self.up2 = nn.Upsample(scale_factor=2)
-
-    def _get_deconv_cfg(self, deconv_kernel):
-        """Get configurations for deconv layers."""
-        if deconv_kernel == 4:
-            padding = 1
-            output_padding = 0
-        elif deconv_kernel == 3:
-            padding = 1
-            output_padding = 1
-        elif deconv_kernel == 2:
-            padding = 0
-            output_padding = 0
-        else:
-            raise ValueError(f'Not supported num_kernels ({deconv_kernel}).')
-
-        return deconv_kernel, padding, output_padding
-
-    def forward(self, x):
-        """Model forward function."""
-        up1 = self.up1(x)
-        low1 = self.low1(x)
-        low2 = self.low2(low1)
-        low3 = self.low3(low2)
-        up2 = self.up2(low3)
-        return up1 + up2
-
 class HourglassModule(nn.Module):
     """Hourglass Module for HourglassNet backbone.
 
@@ -309,6 +210,105 @@ class HourglassNet(BaseBackbone):
 
         return out_feats
 
+class HourglassModuleDconv(nn.Module):
+    """Hourglass Module for HourglassNet backbone.
+
+    Generate module recursively and use BasicBlock as the base unit.
+
+    Args:
+        depth (int): Depth of current HourglassModule.
+        stage_channels (list[int]): Feature channels of sub-modules in current
+            and follow-up HourglassModule.
+        stage_blocks (list[int]): Number of sub-modules stacked in current and
+            follow-up HourglassModule.
+        norm_cfg (dict): Dictionary to construct and config norm layer.
+    """
+
+    def __init__(self,
+                 depth,
+                 stage_channels,
+                 stage_blocks,
+                 norm_cfg=dict(type='BN', requires_grad=True)):
+        # Protect mutable default arguments
+        norm_cfg = copy.deepcopy(norm_cfg)
+        super().__init__()
+
+        self.depth = depth
+
+        cur_block = stage_blocks[0]
+        next_block = stage_blocks[1]
+
+        cur_channel = stage_channels[0]
+        next_channel = stage_channels[1]
+
+        self.up1 = ResLayer(
+            BasicBlock, cur_block, cur_channel, cur_channel, norm_cfg=norm_cfg)
+
+        self.low1 = ResLayer(
+            BasicBlock,
+            cur_block,
+            cur_channel,
+            next_channel,
+            stride=2,
+            norm_cfg=norm_cfg)
+
+        if self.depth > 1:
+            self.low2 = HourglassModuleDconv(depth - 1, stage_channels[1:],
+                                        stage_blocks[1:])
+        else:
+            self.low2 = ResLayer(
+                BasicBlock,
+                next_block,
+                next_channel,
+                next_channel,
+                norm_cfg=norm_cfg)
+
+        self.low3 = ResLayer(
+            BasicBlock,
+            cur_block,
+            next_channel,
+            cur_channel,
+            norm_cfg=norm_cfg,
+            downsample_first=False)
+
+        kernel, padding, output_padding = self._get_deconv_cfg(4)
+        self.up2 = build_upsample_layer(
+            dict(type='deconv'),
+            in_channels=cur_channel,
+            out_channels=cur_channel,
+            kernel_size=kernel,
+            stride=2,
+            padding=padding,
+            output_padding=output_padding,
+            bias=False)
+
+        #self.up2 = nn.Upsample(scale_factor=2)
+
+    def _get_deconv_cfg(self, deconv_kernel):
+        """Get configurations for deconv layers."""
+        if deconv_kernel == 4:
+            padding = 1
+            output_padding = 0
+        elif deconv_kernel == 3:
+            padding = 1
+            output_padding = 1
+        elif deconv_kernel == 2:
+            padding = 0
+            output_padding = 0
+        else:
+            raise ValueError(f'Not supported num_kernels ({deconv_kernel}).')
+
+        return deconv_kernel, padding, output_padding
+
+    def forward(self, x):
+        """Model forward function."""
+        up1 = self.up1(x)
+        low1 = self.low1(x)
+        low2 = self.low2(low1)
+        low3 = self.low3(low2)
+        up2 = self.up2(low3)
+        return up1 + up2
+
 @BACKBONES.register_module()
 class HourglassDconvNet(BaseBackbone):
     """HourglassNet backbone.
@@ -347,6 +347,9 @@ class HourglassDconvNet(BaseBackbone):
                  stage_channels=(256, 256, 384, 384, 384, 512),
                  stage_blocks=(2, 2, 2, 2, 2, 4),
                  feat_channel=256,
+                 in_channels=1,
+                 stem_channels=32,
+                 base_channels=32,
                  norm_cfg=dict(type='BN', requires_grad=True)):
         # Protect mutable default arguments
         norm_cfg = copy.deepcopy(norm_cfg)
@@ -360,8 +363,8 @@ class HourglassDconvNet(BaseBackbone):
         cur_channel = stage_channels[0]
 
         self.stem = nn.Sequential(
-            ConvModule(3, 128, 7, padding=3, stride=2, norm_cfg=norm_cfg),
-            ResLayer(BasicBlock, 1, 128, 256, stride=2, norm_cfg=norm_cfg))
+            ConvModule(in_channels, stem_channels, 3, padding=1, stride=1, norm_cfg=norm_cfg),
+            ResLayer(BasicBlock, 1, stem_channels, base_channels, stride=2, norm_cfg=norm_cfg))
 
         self.hourglass_modules = nn.ModuleList([
             HourglassModuleDconv(downsample_times, stage_channels, stage_blocks)
