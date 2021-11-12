@@ -35,7 +35,7 @@ color_type = 'grayscale'
 feat_channel = 64
 in_channels = 1
 stem_channels = 32
-base_channels = 64
+base_channels = 32
 input_size = 128
 
 # model settings
@@ -46,7 +46,7 @@ model = dict(
         type='HourglassDconvNet',
         downsample_times=3,
         num_stacks=1,
-        stage_channels=(64, 64, 64, 128),
+        stage_channels=(32, 64, 64, 128),
         stage_blocks=(1, 1, 1, 1),
         feat_channel=feat_channel,
         in_channels=in_channels,
