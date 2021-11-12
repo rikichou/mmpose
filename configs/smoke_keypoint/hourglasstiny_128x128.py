@@ -31,6 +31,7 @@ channel_cfg = dict(
     dataset_channel=list(range(numpoints)),
     inference_channel=list(range(numpoints)))
 
+color_type = 'grayscale'
 feat_channel = 32
 in_channels = 1
 stem_channels = 32
@@ -79,7 +80,7 @@ data_cfg = dict(
 )
 
 train_pipeline = [
-    dict(type='LoadImageFromFile'),
+    dict(type='LoadImageFromFile', color_type=color_type),
     dict(type='TopDownRandomFlipWithGrayscale', flip_prob=0.5),
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
@@ -100,7 +101,7 @@ train_pipeline = [
 ]
 
 val_pipeline = [
-    dict(type='LoadImageFromFile'),
+    dict(type='LoadImageFromFile', color_type=color_type),
     dict(type='TopDownAffine'),
     dict(type='ToTensor'),
     dict(
