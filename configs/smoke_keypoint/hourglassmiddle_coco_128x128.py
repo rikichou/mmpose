@@ -4,7 +4,8 @@ resume_from = None
 dist_params = dict(backend='nccl')
 workflow = [('train', 1)]
 checkpoint_config = dict(interval=5)
-evaluation = dict(interval=300, metric='PCKh', save_best='PCKh')
+#evaluation = dict(interval=300, metric='PCKh', save_best='PCKh')
+evaluation = dict(interval=300, metric='mAP', save_best='AP')
 
 optimizer = dict(
     type='Adam',
