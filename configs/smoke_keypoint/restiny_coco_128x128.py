@@ -82,6 +82,10 @@ train_pipeline = [
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
     dict(type='TopDownAffine'),
+    dict(type='Cutout', shape_low=3, shape_high=30, pad_val_low=220, pad_val_high=255),
+    dict(type='Sharpness', magnitude=0.5),
+    dict(type='Brightness', magnitude=0.5),
+    dict(type='Contrast', magnitude=0.5),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',

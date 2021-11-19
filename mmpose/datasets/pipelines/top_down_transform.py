@@ -1,6 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import cv2
+import mmcv
 import numpy as np
+import random
 
 from mmpose.core.post_processing import (affine_transform, fliplr_joints,
                                          get_affine_transform, get_warp_matrix,
@@ -736,3 +738,217 @@ class TopDownRandomTranslation:
                 -1, 1, size=2) * scale * 200
         results['center'] = center
         return results
+
+
+@PIPELINES.register_module()
+class Cutout:
+    """Cutout images.
+
+    Args:
+        shape (int | float | tuple(int | float)): Expected cutout shape (h, w).
+            If given as a single value, the value will be used for
+            both h and w.
+        pad_val (int, tuple[int]): Pixel pad_val value for constant fill. If
+            it is a tuple, it must have the same length with the image
+            channels. Defaults to 128.
+        prob (float): The probability for performing cutout therefore should
+            be in range [0, 1]. Defaults to 0.5.
+    """
+
+    def __init__(self, shape_low, shape_high, pad_val_low, pad_val_high, prob=0.5):
+        self.shape_low = shape_low
+        self.shape_high = shape_high
+        self.pad_val_low = pad_val_low
+        self.pad_val_high = pad_val_high
+        self.prob = prob
+
+    def __call__(self, results):
+        if np.random.rand() > self.prob:
+            return results
+        else:
+            img = results['img']
+
+            shape1 = random.randint(self.shape_low, self.shape_high)
+            shape2 = random.randint(self.shape_low, self.shape_high)
+            padval = random.randint(self.pad_val_low, self.pad_val_high)
+            img_cutout = mmcv.cutout(img, (shape1, shape2), pad_val=padval)
+            results['img'] = img_cutout.astype(img.dtype)
+            return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(shape={self.shape}, '
+        repr_str += f'pad_val={self.pad_val}, '
+        repr_str += f'prob={self.prob})'
+        return repr_str
+
+def random_negative(value, random_negative_prob):
+    """Randomly negate value based on random_negative_prob."""
+    return -value if np.random.rand() < random_negative_prob else value
+
+@PIPELINES.register_module()
+class Sharpness(object):
+    """Adjust images sharpness.
+
+    Args:
+        magnitude (int | float): The magnitude used for adjusting sharpness. A
+            positive magnitude would enhance the sharpness and a negative
+            magnitude would make the image bulr. A magnitude=0 gives the
+            origin img.
+        prob (float): The probability for performing contrast adjusting
+            therefore should be in range [0, 1]. Defaults to 0.5.
+        random_negative_prob (float): The probability that turns the magnitude
+            negative, which should be in range [0,1]. Defaults to 0.5.
+    """
+
+    def __init__(self, magnitude, prob=0.5, random_negative_prob=0.5):
+        assert isinstance(magnitude, (int, float)), 'The magnitude type must '\
+            f'be int or float, but got {type(magnitude)} instead.'
+        assert 0 <= prob <= 1.0, 'The prob should be in range [0,1], ' \
+            f'got {prob} instead.'
+        assert 0 <= random_negative_prob <= 1.0, 'The random_negative_prob ' \
+            f'should be in range [0,1], got {random_negative_prob} instead.'
+
+        self.magnitude = magnitude
+        self.prob = prob
+        self.random_negative_prob = random_negative_prob
+
+    def __call__(self, results):
+        if np.random.rand() > self.prob:
+            return results
+        else:
+            img = results['img']
+            magnitude = random_negative(self.magnitude, self.random_negative_prob)
+            img_sharpened = mmcv.adjust_sharpness(img, factor=1 + magnitude)
+            results['img'] = img_sharpened.astype(img.dtype)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(magnitude={self.magnitude}, '
+        repr_str += f'prob={self.prob}, '
+        repr_str += f'random_negative_prob={self.random_negative_prob})'
+        return repr_str
+
+@PIPELINES.register_module()
+class Brightness():
+    """Adjust images brightness.
+
+    Args:
+        magnitude (int | float): The magnitude used for adjusting brightness. A
+            positive magnitude would enhance the brightness and a negative
+            magnitude would make the image darker. A magnitude=0 gives the
+            origin img.
+        prob (float): The probability for performing contrast adjusting
+            therefore should be in range [0, 1]. Defaults to 0.5.
+        random_negative_prob (float): The probability that turns the magnitude
+            negative, which should be in range [0,1]. Defaults to 0.5.
+    """
+
+    def __init__(self, magnitude, prob=0.5, random_negative_prob=0.5):
+        assert isinstance(magnitude, (int, float)), 'The magnitude type must '\
+            f'be int or float, but got {type(magnitude)} instead.'
+        assert 0 <= prob <= 1.0, 'The prob should be in range [0,1], ' \
+            f'got {prob} instead.'
+        assert 0 <= random_negative_prob <= 1.0, 'The random_negative_prob ' \
+            f'should be in range [0,1], got {random_negative_prob} instead.'
+
+        self.magnitude = magnitude
+        self.prob = prob
+        self.random_negative_prob = random_negative_prob
+
+    def __call__(self, results):
+        if np.random.rand() > self.prob:
+            return results
+        else:
+            img = results['img']
+            tmpm = random.uniform(0, self.magnitude)
+            magnitude = random_negative(tmpm, self.random_negative_prob)
+            results['img'] = mmcv.adjust_brightness(img, factor=1 + magnitude)
+            return results
+
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(magnitude={self.magnitude}, '
+        repr_str += f'prob={self.prob}, '
+        repr_str += f'random_negative_prob={self.random_negative_prob})'
+        return repr_str
+
+@PIPELINES.register_module()
+class Contrast(object):
+    """Adjust images contrast.
+
+    Args:
+        magnitude (int | float): The magnitude used for adjusting contrast. A
+            positive magnitude would enhance the contrast and a negative
+            magnitude would make the image grayer. A magnitude=0 gives the
+            origin img.
+        prob (float): The probability for performing contrast adjusting
+            therefore should be in range [0, 1]. Defaults to 0.5.
+        random_negative_prob (float): The probability that turns the magnitude
+            negative, which should be in range [0,1]. Defaults to 0.5.
+    """
+
+    def __init__(self, magnitude, prob=0.5, random_negative_prob=0.5):
+        assert isinstance(magnitude, (int, float)), 'The magnitude type must '\
+            f'be int or float, but got {type(magnitude)} instead.'
+        assert 0 <= prob <= 1.0, 'The prob should be in range [0,1], ' \
+            f'got {prob} instead.'
+        assert 0 <= random_negative_prob <= 1.0, 'The random_negative_prob ' \
+            f'should be in range [0,1], got {random_negative_prob} instead.'
+
+        self.magnitude = magnitude
+        self.prob = prob
+        self.random_negative_prob = random_negative_prob
+
+    def __call__(self, results):
+        if np.random.rand() > self.prob:
+            return results
+        else:
+            img = results['img']
+            tmpm = random.uniform(0, self.magnitude)
+            magnitude = random_negative(tmpm, self.random_negative_prob)
+            img_contrasted = mmcv.adjust_contrast(img, factor=1 + magnitude)
+            results['img'] = img_contrasted.astype(img.dtype)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(magnitude={self.magnitude}, '
+        repr_str += f'prob={self.prob}, '
+        repr_str += f'random_negative_prob={self.random_negative_prob})'
+        return repr_str
+
+class Posterize(object):
+    """Posterize images (reduce the number of bits for each color channel).
+
+    Args:
+        bits (int | float): Number of bits for each pixel in the output img,
+            which should be less or equal to 8.
+        prob (float): The probability for posterizing therefore should be in
+            range [0, 1]. Defaults to 0.5.
+    """
+
+    def __init__(self, bits, prob=0.5):
+        assert bits <= 8, f'The bits must be less than 8, got {bits} instead.'
+        assert 0 <= prob <= 1.0, 'The prob should be in range [0,1], ' \
+            f'got {prob} instead.'
+
+        self.bits = int(bits)
+        self.prob = prob
+
+    def __call__(self, results):
+        if np.random.rand() > self.prob:
+            return results
+        else:
+            img = results['img']
+            img_posterized = mmcv.posterize(img, bits=self.bits)
+            results['img'] = img_posterized.astype(img.dtype)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(bits={self.bits}, '
+        repr_str += f'prob={self.prob})'
+        return repr_str
