@@ -163,7 +163,7 @@ dataset_info = dict(
         0.089, 0.083, 0.083
     ])
 
-data_root = 'data/smoke_keypoint_mpii_relabel'
+data_root = 'data/smoke_keypoint_coco'
 data = dict(
     samples_per_gpu=128,
     workers_per_gpu=4,
