@@ -19,7 +19,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=0.001,
     step=[170, 200])
-total_epochs = 210
+total_epochs = 310
 log_config = dict(
     interval=50, hooks=[
         dict(type='TextLoggerHook'),
@@ -87,10 +87,10 @@ train_pipeline = [
     dict(type='Brightness', magnitude=0.5),
     #dict(type='Contrast', magnitude=0.5),
     dict(type='ToTensor'),
-    dict(
-        type='NormalizeTensor',
-        mean=[0.5],
-        std=[0.25]),
+    # dict(
+    #     type='NormalizeTensor',
+    #     mean=[0.5],
+    #     std=[0.25]),
     dict(type='TopDownGenerateTarget', sigma=2),
     dict(
         type='Collect',
@@ -105,10 +105,10 @@ val_pipeline = [
     dict(type='LoadImageFromFile', color_type=color_type),
     dict(type='TopDownAffine'),
     dict(type='ToTensor'),
-    dict(
-        type='NormalizeTensor',
-        mean=[0.5],
-        std=[0.25]),
+    # dict(
+    #     type='NormalizeTensor',
+    #     mean=[0.5],
+    #     std=[0.25]),
     dict(
         type='Collect',
         keys=['img'],
