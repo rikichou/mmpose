@@ -844,6 +844,7 @@ class ResNetSimple(BaseBackbone):
 
     def _make_stem_layer(self, in_channels, stem_channels):
         """Make stem layer."""
+        assert(False)
         if self.deep_stem:
             self.stem = nn.Sequential(
                 ConvModule(

@@ -45,6 +45,7 @@ num_deconv_kernels = (4,4)
 
 model = dict(
     type='TopDown',
+    pretrained='work_dirs/restiny_coco_128x128/epoch_282.pth',
     backbone=dict(type='ResNet_Tiny', depth=14, max_channels=max_channels, stem_channels=stem_channels, base_channels=base_channels, in_channels=in_channels),
     keypoint_head=dict(
         type='TopdownHeatmapSimpleHead',
@@ -78,7 +79,7 @@ data_cfg = dict(
 )
 
 train_pipeline = [
-    dict(type='LoadImageFromFile', color_type=color_type),
+    dict(type='LoadImageFromFile', color_type=color_type, channel_order=channel_order),
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
@@ -103,7 +104,7 @@ train_pipeline = [
 ]
 
 val_pipeline = [
-    dict(type='LoadImageFromFile', color_type=color_type),
+    dict(type='LoadImageFromFile', color_type=color_type, channel_order=channel_order),
     dict(type='TopDownAffine'),
     dict(type='ToTensorOrg'),
     dict(
