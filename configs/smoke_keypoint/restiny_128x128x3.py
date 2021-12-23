@@ -35,7 +35,7 @@ channel_cfg = dict(
 # model settings
 color_type='color'
 channel_order='bgr'
-in_channels = 1
+in_channels = 3
 max_channels = 128
 stem_channels = 16
 base_channels = stem_channels
