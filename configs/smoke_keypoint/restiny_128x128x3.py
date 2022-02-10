@@ -83,7 +83,8 @@ train_pipeline = [
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=40, scale_factor=0.5),
-    dict(type='TopDownAffine'),
+    #dict(type='TopDownAffine'),
+    dict(type='ResizeOrg', size=128),
     dict(type='Cutout', shape_low=3, shape_high=30, pad_val_low=220, pad_val_high=255),
     dict(type='Sharpness', magnitude=0.5),
     dict(type='Brightness', magnitude=0.5),
@@ -105,7 +106,8 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadImageFromFile', color_type=color_type, channel_order=channel_order),
-    dict(type='TopDownAffine'),
+    #dict(type='TopDownAffine'),
+    dict(type='ResizeOrg', size=128),
     dict(type='ToTensorOrg'),
     dict(
         type='NormalizeTensor',

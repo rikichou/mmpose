@@ -215,6 +215,34 @@ class TopDownGetRandomScaleRotation:
 
         return results
 
+import cv2
+@PIPELINES.register_module()
+class ResizeOrg:
+    """Affine transform the image to make input.
+
+    Required keys:'img', 'joints_3d', 'joints_3d_visible', 'ann_info','scale',
+    'rotation' and 'center'. Modified keys:'img', 'joints_3d', and
+    'joints_3d_visible'.
+
+    Args:
+        use_udp (bool): To use unbiased data processing.
+            Paper ref: Huang et al. The Devil is in the Details: Delving into
+            Unbiased Data Processing for Human Pose Estimation (CVPR 2020).
+    """
+
+    def __init__(self, size):
+        self.size = size
+
+    def __call__(self, results):
+        image_size = results['ann_info']['image_size']
+        
+        assert image_size[0] == self.size
+
+        img = results['img']
+        img = cv2.resize(img, (image_size[1], image_size[0]))
+        
+        results['img'] = img
+        return results
 
 @PIPELINES.register_module()
 class TopDownAffine:
@@ -261,7 +289,6 @@ class TopDownAffine:
                 if joints_3d_visible[i, 0] > 0.0:
                     joints_3d[i,
                               0:2] = affine_transform(joints_3d[i, 0:2], trans)
-
         results['img'] = img
         results['joints_3d'] = joints_3d
         results['joints_3d_visible'] = joints_3d_visible
